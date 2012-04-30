@@ -18,7 +18,6 @@ headers = {
 class LoginException(Exception):
     pass
 
-
 class RequestException(Exception):
     pass
 
@@ -40,9 +39,7 @@ class WhatAPI:
     def __del__(self):
         logoutpage = 'http://what.cd/logout.php'
         data = {'auth': self.authkey}
-        r = self.session.get(logoutpage, data=data, allow_redirects=False)
-        if r.status_code != 302 or r.headers['location'] != 'login.php':
-            raise LogoutException
+        self.session.get(logoutpage, data=data, allow_redirects=False)
     
     def _login(self):
         '''Logs in user and gets authkey from server'''
