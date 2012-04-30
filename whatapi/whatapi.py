@@ -37,17 +37,27 @@ class WhatAPI:
             self.password = password
         self._login()
 
+    def __del__(self):
+        logoutpage = 'http://what.cd/logout.php'
+        data = {'auth': self.authkey}
+        r = self.session.get(logoutpage, data=data, allow_redirects=False)
+        if r.status_code != 302 or r.headers['location'] != 'login.php':
+            raise LogoutException
+    
     def _login(self):
         '''Logs in user and gets authkey from server'''
         loginpage = 'http://what.cd/login.php'
         data = {'username': self.username,
-                'password': self.password}
-        r = self.session.post(loginpage, data=data)
+                'password': self.password,
+                'keeplogged': 1,
+                'login': 'Login'}
+        r = self.session.post(loginpage, data=data, allow_redirects=False)
         if r.status_code != 302 or r.headers['location'] != 'index.php':
             raise LoginException
         accountinfo = self.request("index")
         self.authkey = accountinfo["response"]["authkey"]
-
+    
+    
     def request(self, action, **kwargs):
         '''Makes an AJAX request at a given action page'''
         ajaxpage = 'http://what.cd/ajax.php'
